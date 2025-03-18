@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Веб-квиз</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+
+        <div class="logo-container">
+
+            <img src="images/header/ano-logo.png" alt="АНО ЦЭ" class="logo">
+
+            <img src="https://cipr.ru/wp-content/uploads/2024/02/cipr-logo-2024.svg" alt="ЦИПР" class="logo">
+
+        </div>
+
+    </header>
+    <div class="quiz-container">
+        <h1>Веб-квиз</h1>
+        
+        <!-- Добавляем форму регистрации -->
+        <div id="registration" class="registration-form">
+            <h2>Регистрация</h2>
+            <div class="form-group">
+                <input type="text" id="fullName" placeholder="ФИО" required>
+            </div>
+            <div class="form-group">
+                <input type="text" id="company" placeholder="Название компании" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="email" placeholder="Email" required>
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="agreement" required>
+                <label for="agreement">Согласен на обработку персональных данных</label>
+            </div>
+            <div class="quiz-options">
+                <button id="startQuiz1" class="quiz-option">3 минуты<span>5 вопросов</span></button>
+                <button id="startQuiz2" class="quiz-option">5 минут<span>10 вопросов</span></button>
+                <button id="startQuiz3" class="quiz-option">7 минут<span>15 вопросов</span></button>
+            </div>
+        </div>
+
+        <!-- Существующий код квиза -->
+        <div id="quiz" style="display: none;">
+            <h2 id="question"></h2>
+            <div id="choices"></div>
+            <button id="submit">Ответить</button>
+        </div>
+        
+        <div id="results" style="display: none;">
+            <h2>Результаты</h2>
+            <p>Правильных ответов: <span id="score"></span></p>
+            <button id="restart">Начать заново</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
