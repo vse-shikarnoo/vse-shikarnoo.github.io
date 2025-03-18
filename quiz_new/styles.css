@@ -1,0 +1,235 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    padding-top: 60px;
+}
+
+.quiz-container {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    max-width: 600px;
+    width: 90%;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.choice {
+    display: block;
+    margin: 10px 0;
+    padding: 10px;
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.choice:hover {
+    background-color: #e0e0e0;
+}
+
+.choice.selected {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.choice.correct {
+    background-color: #4CAF50;
+    color: white;
+    pointer-events: none;
+}
+
+.choice.incorrect {
+    background-color: #f44336;
+    color: white;
+    pointer-events: none;
+}
+
+/* Отключаем взаимодействие со всеми вариантами после выбора */
+.choice.disabled {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    padding: 15px 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.logo-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.logo {
+    height: 35px;
+    width: auto;
+    object-fit: contain;
+}
+
+.logo:first-child {
+    margin-right: auto;
+}
+
+.logo:last-child {
+    margin-left: auto;
+}
+
+@media (max-width: 480px) {
+    .logo-container {
+        padding: 0 20px;
+    }
+    
+    .logo {
+        height: 25px;
+    }
+    
+    body {
+        padding-top: 50px;
+    }
+}
+
+.registration-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus {
+    outline: none;
+    border-color: #4CAF50;
+    box-shadow: 0 0 5px rgba(74, 175, 80, 0.2);
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.checkbox-group label {
+    cursor: pointer;
+    font-size: 14px;
+    color: #666;
+}
+
+/* Стили для placeholder */
+::placeholder {
+    color: #999;
+    opacity: 1;
+}
+
+/* Добавляем стили для группы кнопок */
+.quiz-options {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.quiz-option {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 15px 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.quiz-option:hover {
+    background-color: #45a049;
+}
+
+.quiz-option span {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Добавляем стили для неактивных кнопок */
+.quiz-option:disabled,
+.quiz-option.disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.quiz-option:disabled:hover,
+.quiz-option.disabled:hover {
+    background-color: #cccccc;
+}
+
+@media (max-width: 480px) {
+    .quiz-options {
+        flex-direction: column;
+    }
+    
+    .quiz-option {
+        width: 100%;
+    }
+}
