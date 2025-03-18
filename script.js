@@ -79,6 +79,7 @@ const elements = {
     submit: document.getElementById('submit'),
     quiz: document.getElementById('quiz'),
     results: document.getElementById('results'),
+    resultsContainer: document.getElementById('resultsContainer'),
     score: document.getElementById('score'),
     restart: document.getElementById('restart'),
     quizButtons: [
@@ -164,14 +165,24 @@ function showResults() {
     elements.results.style.display = 'block';
     elements.score.innerText = `${score} из ${randomQuestions.length}`;
     
+    // Проверяем, существует ли контейнер для результатов
+    const resultsContainer = elements.resultsContainer || elements.results;
+    
+    // Удаляем старую кнопку, если она существует
+    const oldEmailButton = resultsContainer.querySelector('.email-button');
+    if (oldEmailButton) {
+        oldEmailButton.remove();
+    }
+    
     // Добавляем кнопку отправки на почту
     const emailButton = document.createElement('button');
     emailButton.textContent = 'Отправить результаты на почту';
     emailButton.classList.add('email-button');
+    emailButton.style.display = 'block'; // Явно задаем стиль отображения
+    emailButton.style.margin = '20px auto'; // Центрируем кнопку
     emailButton.addEventListener('click', sendResultsByEmail);
     
-    // Добавляем кнопку в elements.results вместо несуществующего resultsContainer
-    elements.results.appendChild(emailButton);
+    resultsContainer.appendChild(emailButton);
 }
 
 function resetQuiz() {
