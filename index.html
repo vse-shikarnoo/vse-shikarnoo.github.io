@@ -60,12 +60,8 @@
                     <input type="email" id="email" placeholder="Email" required>
                 </div>
                 <div class="form-group checkbox-group">
-                    <input type="checkbox" id="agreement1" required>
-                    <label for="agreement1">Соглашаюсь с <a href="https://files.data-economy.ru/Docs/privacy.pdf" class="policy-link" target="_blank">политикой в отношении обработки персональных данных</a></label>
-                </div>
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="agreement2" required>
-                    <label for="agreement2">Соглашаюсь с <a href="#" class="policy-link" onclick="showPrivacyPolicy(); return false;">политикой в отношении обработки персональных данных</a></label>
+                    <input type="checkbox" id="agreement" required>
+                    <label for="agreement">Соглашаюсь с <a href="https://files.data-economy.ru/Docs/privacy.pdf" class="policy-link" target="_blank">политикой в отношении обработки персональных данных</a></label>
                 </div>
                 <div class="quiz-options">
                     <button id="startQuiz1" class="quiz-option">3 минуты<span>6 вопросов</span></button>
@@ -102,5 +98,25 @@
     </main>
     <script src="quizData.js"></script>
     <script src="script.js"></script>
+
+    <!-- Добавить стили для неактивных кнопок начала квиза -->
+    <style>
+        .quiz-option:disabled,
+        .quiz-option.disabled {
+            background: linear-gradient(145deg, #cccccc, #aaaaaa) !important;
+            cursor: not-allowed !important;
+            opacity: 0.7 !important;
+            box-shadow: none !important;
+            transform: none !important;
+            pointer-events: none !important;
+        }
+
+        .quiz-option:disabled:hover,
+        .quiz-option.disabled:hover {
+            transform: none !important;
+            box-shadow: none !important;
+            background: linear-gradient(145deg, #cccccc, #aaaaaa) !important;
+        }
+    </style>
 </body>
 </html> 

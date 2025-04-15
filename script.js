@@ -8,6 +8,9 @@ let userData = {
     email: ''
 };
 
+// Добавляем массив для хранения выбранных ответов
+let userAnswers = [];
+
 // ============= DOM элементы =============
 const elements = {
     registration: document.getElementById('registration'),
@@ -17,8 +20,7 @@ const elements = {
     fullName: document.getElementById('fullName'),
     company: document.getElementById('company'),
     email: document.getElementById('email'),
-    agreement1: document.getElementById('agreement1'),
-    agreement2: document.getElementById('agreement2'),
+    agreement: document.getElementById('agreement'),
     question: document.getElementById('question'),
     choices: document.getElementById('choices'),
     submit: document.getElementById('submit'),
@@ -76,24 +78,49 @@ function getRandomQuestionsFromAllSources(questionsPerSource) {
     return result;
 }
 
-function validateForm() {
-    if (!elements.fullName.value.trim()) {
-        alert('Пожалуйста, введите ФИО');
+// Объединенная функция проверки формы
+function validateForm(showAlert = true) {
+    // Убедимся, что все элементы доступны перед проверкой
+    if (!elements.fullName || !elements.company || !elements.email || !elements.agreement) {
+        console.error("Form elements not ready for validation yet.");
         return false;
     }
-    if (!elements.company.value.trim()) {
-        alert('Пожалуйста, введите название компании');
-        return false;
+
+    const isFullNameValid = elements.fullName.value.trim() !== '';
+    const isCompanyValid = elements.company.value.trim() !== '';
+    const isEmailValid = elements.email.value.trim() !== '';
+    const isAgreementChecked = elements.agreement.checked;
+
+    const isValid = isFullNameValid && isCompanyValid && isEmailValid && isAgreementChecked;
+
+    // Показываем алерты только если требуется (при отправке формы)
+    if (showAlert && !isValid) {
+        if (!isFullNameValid) {
+            alert('Пожалуйста, введите ФИО');
+        } else if (!isCompanyValid) {
+            alert('Пожалуйста, введите название компании');
+        } else if (!isEmailValid) {
+            alert('Пожалуйста, введите email');
+        } else if (!isAgreementChecked) {
+            alert('Необходимо согласие на обработку персональных данных');
+        }
     }
-    if (!elements.email.value.trim()) {
-        alert('Пожалуйста, введите email');
-        return false;
+
+    // Обновляем состояние кнопок
+    if (elements.quizButtons) {
+        elements.quizButtons.forEach(button => {
+            if (button) {
+                button.disabled = !isValid;
+                if (!isValid) {
+                    button.classList.add('disabled');
+                } else {
+                    button.classList.remove('disabled');
+                }
+            }
+        });
     }
-    if (!elements.agreement1.checked && !elements.agreement2.checked) {
-        alert('Необходимо согласие на обработку персональных данных');
-        return false;
-    }
-    return true;
+
+    return isValid;
 }
 
 // ============= Функции управления квизом =============
@@ -105,42 +132,34 @@ function loadQuestion() {
     // --- Подсветка логотипа в бегущей строке ---
     const allMarqueeLogos = document.querySelectorAll('.background-marquee .marquee-content img');
     allMarqueeLogos.forEach(img => {
-        img.classList.remove('highlighted-logo'); // Сначала убираем подсветку со всех
-        // Сравниваем конец src, чтобы избежать проблем с абсолютными/относительными путями
+        img.classList.remove('highlighted-logo');
         if (currentLogoSrc && img.src.endsWith(currentLogoSrc)) {
-            img.classList.add('highlighted-logo'); // Подсвечиваем нужный
+            img.classList.add('highlighted-logo');
         }
     });
-    // -------------------------------------------
 
-    quizContent.innerHTML = ''; // Очищаем предыдущее
+    quizContent.innerHTML = '';
 
-    // --- Добавляем/удаляем класс для layout ---
     if (questionData.image) {
         quizContent.classList.add('layout-two-column');
     } else {
         quizContent.classList.remove('layout-two-column');
     }
 
-    // --- Создаем и добавляем элементы ---
-
-    // 1. Контейнер вопроса (лого + текст) - класс для grid-area
+    // 1. Контейнер вопроса (лого + текст)
     const questionContainer = document.createElement('div');
     questionContainer.className = 'quiz-question-area';
     questionContainer.innerHTML = `
-        <div class="company-logo">
-            <img src="${questionData.logo}" alt="Company logo">
-        </div>
         <div class="question-text">
             ${questionData.question}
         </div>
     `;
     quizContent.appendChild(questionContainer);
 
-    // 2. Изображение (если есть) - класс для grid-area
+    // 2. Изображение (если есть)
     if (questionData.image) {
         const imageContainer = document.createElement('div');
-        imageContainer.className = 'quiz-image-area question-image-container'; // Добавляем оба класса
+        imageContainer.className = 'quiz-image-area question-image-container';
         const imgElement = document.createElement('img');
         imgElement.src = questionData.image;
         imgElement.alt = 'Question illustration';
@@ -148,11 +167,11 @@ function loadQuestion() {
         quizContent.appendChild(imageContainer);
     }
 
-    // 3. Варианты ответов - ID и класс для grid-area
+    // 3. Варианты ответов
     const choicesContainer = document.createElement('div');
     choicesContainer.id = 'choices';
     choicesContainer.className = 'quiz-choices-area';
-    questionData.choices.forEach((choiceText) => {
+    questionData.choices.forEach((choiceText, index) => {
         const button = document.createElement('button');
         button.className = 'choice';
         button.textContent = choiceText;
@@ -161,27 +180,63 @@ function loadQuestion() {
     });
     quizContent.appendChild(choicesContainer);
 
-    // 4. Кнопки действий - класс для grid-area
+    // 4. Кнопки действий
     const actionsContainer = document.createElement('div');
-    actionsContainer.className = 'quiz-actions-area quiz-actions'; // Добавляем оба класса
+    actionsContainer.className = 'quiz-actions-area';
+    
+    // Создаем HTML для кнопок
     actionsContainer.innerHTML = `
-        <button class="back-button" onclick="resetQuiz()">
-            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-            Вернуться назад
-        </button>
-        <button id="submit">Следующий вопрос</button>
+        <div class="nav-buttons">
+            ${currentQuestion > 0 ? `
+                <button class="back-button" onclick="goToPreviousQuestion()">
+                    <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                    Вернуться назад
+                </button>
+            ` : '<div></div>'}
+            <button id="submit">Следующий вопрос</button>
+        </div>
     `;
-    actionsContainer.querySelector('#submit').addEventListener('click', handleSubmit);
+
+    // Добавляем обработчик для кнопки "Следующий вопрос"
+    const submitButton = actionsContainer.querySelector('#submit');
+    submitButton.addEventListener('click', handleSubmit);
+    
     quizContent.appendChild(actionsContainer);
 
-    // Обновляем глобальные ссылки
-    // elements.question = questionContainer; // Не используем глобальную ссылку на этот div
-    elements.choices = choicesContainer; // Эта ссылка нужна
-    elements.submit = actionsContainer.querySelector('#submit'); // Эта ссылка нужна
-
-    // Разблокируем кнопку submit для нового вопроса
-    elements.submit.disabled = true; // Блокируем до выбора ответа
-    elements.submit.classList.add('disabled');
+    elements.choices = choicesContainer;
+    elements.submit = submitButton;
+    
+    // Проверяем, есть ли сохраненный ответ для текущего вопроса
+    const savedAnswer = userAnswers[currentQuestion];
+    if (savedAnswer !== undefined) {
+        // Если есть сохраненный ответ, выбираем его и показываем результаты
+        const choiceButtons = Array.from(elements.choices.children);
+        if (choiceButtons[savedAnswer]) {
+            // Восстанавливаем выбранный ответ и показываем правильный/неправильный
+            const correctIndex = randomQuestions[currentQuestion].correct;
+            
+            // Применяем классы для отображения результата
+            choiceButtons[savedAnswer].classList.add('selected');
+            
+            if (savedAnswer === correctIndex) {
+                choiceButtons[savedAnswer].classList.add('correct');
+            } else {
+                choiceButtons[savedAnswer].classList.add('incorrect');
+                choiceButtons[correctIndex].classList.add('correct');
+            }
+            
+            // Блокируем все варианты ответов
+            choiceButtons.forEach(btn => btn.classList.add('disabled'));
+            
+            // Активируем кнопку "Далее"
+            elements.submit.disabled = false;
+            elements.submit.classList.remove('disabled');
+        }
+    } else {
+        // Если нет сохраненного ответа, кнопка "Далее" должна быть неактивна
+        elements.submit.disabled = true;
+        elements.submit.classList.add('disabled');
+    }
 
     updateProgress();
 }
@@ -190,24 +245,56 @@ function selectChoice(button) {
     const currentChoicesContainer = button.closest('#choices');
     if (!currentChoicesContainer) return;
 
-    const selectedButton = currentChoicesContainer.querySelector('.selected');
+    // Снимаем выбор с предыдущей кнопки и удаляем классы correct/incorrect со всех кнопок
+    const choiceButtons = Array.from(currentChoicesContainer.children);
+    choiceButtons.forEach(btn => {
+        btn.classList.remove('selected', 'correct', 'incorrect');
+        btn.classList.remove('disabled');
+    });
 
-    // Снимаем выбор с предыдущей кнопки
-    if (selectedButton) {
-        selectedButton.classList.remove('selected');
-    }
-
-    // Выбираем новую кнопку (без correct/incorrect - это будет в handleSubmit)
+    // Выбираем новую кнопку
     button.classList.add('selected');
 
-    // Разблокируем кнопку "Следующий вопрос", если она была заблокирована
-    if (elements.submit && elements.submit.disabled) {
+    // Получаем индекс выбранного ответа
+    const selectedAnswerIndex = choiceButtons.indexOf(button);
+    const correctIndex = randomQuestions[currentQuestion].correct;
+    
+    // Сохраняем ответ пользователя
+    userAnswers[currentQuestion] = selectedAnswerIndex;
+
+    // Сразу показываем правильный/неправильный ответ
+    if (selectedAnswerIndex === correctIndex) {
+        button.classList.add('correct');
+    } else {
+        button.classList.add('incorrect');
+        // Показываем правильный ответ
+        if (choiceButtons[correctIndex]) {
+            choiceButtons[correctIndex].classList.add('correct');
+        }
+    }
+
+    // Блокируем кнопки после ответа
+    choiceButtons.forEach(btn => btn.classList.add('disabled'));
+
+    // Разблокируем кнопку "Следующий вопрос"
+    if (elements.submit) {
         elements.submit.disabled = false;
-         elements.submit.classList.remove('disabled');
+        elements.submit.classList.remove('disabled');
     }
 }
 
+function resetHighlightedLogos() {
+    // Удаляем класс highlighted-logo со всех логотипов в бегущей строке
+    const allMarqueeLogos = document.querySelectorAll('.background-marquee .marquee-content img');
+    allMarqueeLogos.forEach(img => {
+        img.classList.remove('highlighted-logo');
+    });
+}
+
 function showResults() {
+    // Сбрасываем выделение логотипов
+    resetHighlightedLogos();
+
     elements.quiz.style.display = 'none';
     elements.results.style.display = 'block';
     
@@ -253,18 +340,22 @@ function showResults() {
 }
 
 function resetQuiz() {
+    // Сбрасываем массив ответов
+    userAnswers = [];
+    currentQuestion = 0;
+    score = 0;
+    
+    // Сбрасываем выделение логотипов
+    resetHighlightedLogos();
+    
     // Очистка формы
     elements.fullName.value = '';
     elements.company.value = '';
     elements.email.value = '';
-    elements.agreement1.checked = false;
-    elements.agreement2.checked = false;
+    elements.agreement.checked = false;
     
     // Сброс данных
     userData = { fullName: '', company: '', email: '' };
-    currentQuestion = 0;
-    score = 0;
-    randomQuestions = [];
     
     // Управление отображением
     elements.registration.style.display = 'block';
@@ -272,12 +363,12 @@ function resetQuiz() {
     elements.results.style.display = 'none';
     
     // Сброс состояния кнопок
-    checkFormValidity();
+    validateForm(false);
 }
 
 // ============= Функция для начала квиза =============
 function startQuiz(totalQuestions) {
-    if (validateForm()) {
+    if (validateForm(true)) {
         userData = {
             fullName: elements.fullName.value.trim(),
             company: elements.company.value.trim(),
@@ -308,47 +399,21 @@ elements.startQuiz3.addEventListener('click', () => startQuiz(18)); // 7 мин�
 elements.restart?.addEventListener('click', resetQuiz);
 
 // ============= Инициализация =============
-// Добавим функцию проверки формы для активации/деактивации кнопок
-function checkFormValidity() {
-    // Убедимся, что все элементы доступны перед проверкой
-    if (!elements.fullName || !elements.company || !elements.email || !elements.agreement1 || !elements.agreement2 || !elements.quizButtons) {
-        console.error("Form elements not ready for validation yet.");
-        return;
-    }
-
-    const isValid =
-        elements.fullName.value.trim() !== '' &&
-        elements.company.value.trim() !== '' &&
-        elements.email.value.trim() !== '' &&
-        (elements.agreement1.checked || elements.agreement2.checked);
-
-    elements.quizButtons.forEach(button => {
-        // Проверяем, что button не null (на всякий случай)
-        if (button) {
-            button.disabled = !isValid;
-            if (!isValid) {
-                button.classList.add('disabled');
-            } else {
-                button.classList.remove('disabled');
-            }
-        } else {
-             console.error("Quiz button element is null during validation.");
-        }
-    });
-}
-
-// Добавим слушатели событий для всех полей формы
-elements.fullName?.addEventListener('input', checkFormValidity);
-elements.company?.addEventListener('input', checkFormValidity);
-elements.email?.addEventListener('input', checkFormValidity);
-elements.agreement1?.addEventListener('change', checkFormValidity);
-elements.agreement2?.addEventListener('change', checkFormValidity);
-
-// Вызовем функцию при загрузке страницы, убедившись, что DOM готов
-// Если скрипт в конце body, DOM обычно готов, но для надежности можно обернуть
+// Вызовем функцию при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
-     console.log("DOM fully loaded and parsed. Running initial checkFormValidity...");
-     checkFormValidity();
+    console.log("DOM fully loaded and parsed. Running initial form validation...");
+    
+    // Явно деактивируем кнопки начала квиза при загрузке страницы
+    if (elements.quizButtons) {
+        elements.quizButtons.forEach(button => {
+            if (button) {
+                button.disabled = true;
+                button.classList.add('disabled');
+            }
+        });
+    }
+    
+    validateForm(false);
 });
 
 // Добавляем новую функцию для отправки результатов
@@ -431,41 +496,20 @@ function handleSubmit() {
     const choiceButtons = Array.from(elements.choices.children);
     const selectedAnswerIndex = choiceButtons.indexOf(selectedChoice);
 
+    // Добавляем очко, если ответ правильный
     if (selectedAnswerIndex === randomQuestions[currentQuestion].correct) {
         score++;
     }
 
-    // --- Логика подсветки правильного/неправильного ---
-    const correctIndex = randomQuestions[currentQuestion].correct;
-    if (selectedAnswerIndex === correctIndex) {
-        selectedChoice.classList.add('correct');
+    // Переходим к следующему вопросу без таймера
+    currentQuestion++;
+    if (currentQuestion < randomQuestions.length) {
+        loadQuestion();
+        // updateProgress вызывается внутри loadQuestion
     } else {
-        selectedChoice.classList.add('incorrect');
-        // Показываем правильный ответ
-        if (choiceButtons[correctIndex]) {
-             choiceButtons[correctIndex].classList.add('correct');
-        }
+        showResults();
     }
-    // Блокируем кнопки после ответа
-    choiceButtons.forEach(button => button.classList.add('disabled'));
-    // Блокируем кнопку "Следующий вопрос" временно, чтобы показать результат
-    if (elements.submit) { // Проверка на существование кнопки
-        elements.submit.disabled = true;
-        elements.submit.classList.add('disabled'); // Визуальная блокировка
-    }
-
-
-    // Переходим к следующему вопросу с небольшой задержкой
-    setTimeout(() => {
-        currentQuestion++;
-        if (currentQuestion < randomQuestions.length) {
-            loadQuestion();
-            // updateProgress вызывается внутри loadQuestion теперь
-        } else {
-            showResults();
-        }
-    }, 1000); // Уменьшил задержку до 1 секунды
-} 
+}
 
 // Функция для отображения политики обработки персональных данных
 function showPrivacyPolicy() {
@@ -511,4 +555,17 @@ function closeModal() {
     if (modalOverlay) {
         document.body.removeChild(modalOverlay);
     }
-} 
+}
+
+function goToPreviousQuestion() {
+    if (currentQuestion > 0) {
+        currentQuestion--;
+        loadQuestion();
+    }
+}
+
+// Добавим слушатели событий для всех полей формы
+elements.fullName?.addEventListener('input', () => validateForm(false));
+elements.company?.addEventListener('input', () => validateForm(false));
+elements.email?.addEventListener('input', () => validateForm(false));
+elements.agreement?.addEventListener('change', () => validateForm(false)); 

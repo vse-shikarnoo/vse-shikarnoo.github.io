@@ -25,7 +25,7 @@ main {
 }
 
 .quiz-container {
-    max-width: 1000px;
+    max-width: 1100px;
     width: 90%;
     margin: 0 auto;
     background: none;
@@ -39,7 +39,7 @@ main {
 
 /* Стили для белой карточки */
 .quiz-card {
-    background: rgba(255, 255, 255, 0.9); /* Полупрозрачный белый */
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 24px;
     padding: 30px 40px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
@@ -176,17 +176,51 @@ main {
     opacity: 0.75;
 }
 
-/* Контейнер кнопок действий */
-.quiz-actions-area.quiz-actions {
-    margin-top: 15px;
+/* Навигационные кнопки для обычного макета */
+.quiz-actions-area {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+    width: 100%;
+}
+
+.quiz-actions-area .nav-buttons {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-top: 10px;
     width: 100%;
-    border-top: 1px solid #e9ecef;
 }
-#submit {
+
+/* Если нет кнопки "Назад", всё равно сохраняем пространство */
+.quiz-actions-area .nav-buttons > div:empty {
+    width: 130px; /* Примерная ширина кнопки "Назад" */
+}
+
+.quiz-actions-area .back-button {
+    background: transparent;
+    border: none;
+    color: #6c757d;
+    font-size: 15px;
+    cursor: pointer;
+    padding: 12px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.3s ease;
+    min-width: 130px;
+}
+
+.quiz-actions-area .back-button svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+}
+
+.quiz-actions-area .back-button:hover {
+    color: #343a40;
+}
+
+.quiz-actions-area #submit {
     background: #007bff;
     padding: 12px 25px;
     border-radius: 8px;
@@ -196,129 +230,151 @@ main {
     border: none;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    box-shadow: none;
-    margin: 0;
-    display: block;
-}
-#submit:hover:not(:disabled) { background: #0056b3; }
-#submit.disabled, #submit:disabled {
-     background-color: #6c757d;
-     cursor: not-allowed;
-     opacity: 0.65;
+    min-width: 130px;
 }
 
-.back-button {
-    background: none;
-    border: none;
-    color: #6c757d;
-    font-size: 15px;
-    cursor: pointer;
-    padding: 10px 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: color 0.3s ease;
+.quiz-actions-area #submit:hover:not(:disabled) {
+    background: #0056b3;
 }
-.back-button:hover { color: #343a40; }
-.back-button svg { width: 16px; height: 16px; fill: currentColor; }
+
+.quiz-actions-area #submit:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.65;
+}
+
+/* Мобильные стили */
+@media (max-width: 768px) {
+    .quiz-actions-area .nav-buttons {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .quiz-actions-area .nav-buttons > div:empty {
+        display: none;
+    }
+
+    .quiz-actions-area .back-button,
+    .quiz-actions-area #submit {
+        width: 100%;
+        min-width: 0;
+        justify-content: center;
+        text-align: center;
+        padding: 12px;
+    }
+
+    .quiz-actions-area .back-button {
+        order: 2;
+    }
+
+    .quiz-actions-area #submit {
+        order: 1;
+    }
+}
 
 /* --- Стили для двух колонок (активируются классом layout-two-column) --- */
 .quiz-content.layout-two-column {
     display: grid;
-    grid-template-columns: 55% 40%;
-    grid-template-rows: auto 1fr;
+    grid-template-columns: 50% 45%;
+    grid-template-rows: auto 1fr auto;
     grid-template-areas:
         "question image"
         "choices image"
-        "actions image";
+        "actions actions";
     gap: 30px 40px;
     align-items: start;
+    min-height: 500px;
 }
 
-/* Размещаем элементы по областям */
-.quiz-content.layout-two-column .quiz-question-area { grid-area: question; }
-.quiz-content.layout-two-column .quiz-choices-area { grid-area: choices; margin-top: 0; }
-.quiz-content.layout-two-column .quiz-actions-area { grid-area: actions; }
+.quiz-content.layout-two-column .quiz-question-area {
+    grid-area: question;
+}
+
+.quiz-content.layout-two-column .quiz-choices-area {
+    grid-area: choices;
+    margin-top: 0;
+}
+
 .quiz-content.layout-two-column .quiz-image-area {
-     grid-area: image;
-     width: 100%;
-     margin-bottom: 0;
-     align-self: stretch;
-     max-height: none;
-     min-height: 300px;
-}
-.quiz-content.layout-two-column .quiz-image-area img {
-    object-fit: cover;
-    width: 100%;
-    height: 100%;
-}
-
-/* Контейнер вопроса в двухколонке: лого и текст рядом */
-/* Этот блок теперь не нужен, т.к. основной стиль .quiz-question-area уже делает это */
-/* .quiz-content.layout-two-column .quiz-question-area {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 15px;
+    grid-area: image;
+    display: flex;
     align-items: center;
-} */
-.quiz-content.layout-two-column .company-logo {
-     margin-bottom: 0; /* Этот стиль можно оставить, если он нужен для grid */
+    justify-content: center;
+    align-self: center;
 }
 
-/* Мобильная адаптация для карточки и колонок */
-@media (max-width: 768px) {
-    .quiz-container { width: 95%; }
-    .quiz-card { padding: 20px; }
+.quiz-content.layout-two-column .quiz-image-area img {
+    display: block;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    max-height: 400px;
+    border-radius: 24px !important;
+    object-fit: contain;
+}
 
+/* Сброс всех возможных конфликтующих стилей */
+.quiz-image-area img {
+    border-radius: 24px !important;
+    overflow: visible !important;
+}
+
+.quiz-content.layout-two-column .quiz-actions-area {
+    grid-area: actions;
+    width: 100%;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e9ecef;
+}
+
+.quiz-content.layout-two-column .quiz-actions-area .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.quiz-content.layout-two-column .back-button {
+    justify-self: start;
+}
+
+.quiz-content.layout-two-column #submit {
+    justify-self: end;
+}
+
+/* Мобильные стили */
+@media (max-width: 768px) {
     .quiz-content.layout-two-column {
+        min-height: auto;
+    }
+
+    .quiz-content.layout-two-column .quiz-image-area img {
+        max-height: 300px;
+        border-radius: 16px !important;
+    }
+    
+    .quiz-content.layout-two-column .quiz-actions-area {
         display: flex;
         flex-direction: column;
-        gap: 20px;
-        grid-template-areas: none;
-        grid-template-columns: none;
-        grid-template-rows: none;
-    }
-    .quiz-content.layout-two-column > * {
-        grid-area: unset !important;
-    }
-    .quiz-content.layout-two-column .quiz-question-area {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    .company-logo {
-        width: 60px;
-    }
-    .question-text {
-        font-size: 16px;
-        flex-grow: 0;
-    }
-
-    .quiz-content.layout-two-column .quiz-image-area {
-        order: 1;
-        max-height: 250px;
-        min-height: auto;
-        align-self: auto;
-    }
-     .quiz-content.layout-two-column .quiz-image-area img {
-        object-fit: contain;
-        height: auto;
-     }
-    .quiz-content.layout-two-column .quiz-choices-area { order: 2; }
-    .quiz-content.layout-two-column .quiz-actions-area { order: 3; }
-
-    .quiz-actions-area.quiz-actions {
-        flex-direction: column-reverse;
-        align-items: stretch;
         gap: 15px;
-        border-top: none;
-        padding-top: 15px;
+        width: 100%;
     }
-    #submit { width: 100%; }
-    .back-button { justify-content: center; padding: 10px; }
 
-    .choice { font-size: 14px; padding: 12px 16px; }
-    .question-text { font-size: 16px; }
+    .quiz-content.layout-two-column .back-button,
+    .quiz-content.layout-two-column #submit {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+        padding: 12px;
+    }
+
+    .quiz-content.layout-two-column .back-button {
+        order: 2;
+    }
+
+    .quiz-content.layout-two-column #submit {
+        order: 1;
+    }
 }
 
 /* Стили для header, registration, results - проверяем, чтобы они выглядели нормально на синем фоне или внутри карточки */
@@ -654,7 +710,7 @@ main {
     text-align: center;
 }
 
-.quiz-option:hover {
+.quiz-option:not(:disabled):hover {
     transform: translateY(-4px);
     box-shadow: 
         0 15px 30px rgba(76, 175, 80, 0.2),
@@ -669,17 +725,21 @@ main {
     font-weight: 400;
 }
 
-/* Добавляем стили для неактивных кнопок */
+/* Стили для неактивных кнопок */
 .quiz-option:disabled,
 .quiz-option.disabled {
-    background-color: #cccccc;
+    background: linear-gradient(145deg, #cccccc, #aaaaaa);
     cursor: not-allowed;
     opacity: 0.7;
+    box-shadow: none;
+    transform: none;
+    pointer-events: none;
 }
 
 .quiz-option:disabled:hover,
 .quiz-option.disabled:hover {
-    background-color: #cccccc;
+    transform: none;
+    box-shadow: none;
 }
 
 @media (max-width: 768px) {
@@ -939,7 +999,7 @@ main {
 /* @keyframes scroll-right-rotated { ... } */
 
 .marquee-content img {
-    height: 50px;
+    height: 150px;
     margin: 0 30px;
     vertical-align: middle;
     opacity: 0.3; /* Сильная прозрачность для фона */
