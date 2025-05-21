@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .card p {
+            color: #666;
+        }
+
+        .iframe-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .iframe-wrapper {
+            position: relative;
+            width: 90%;
+            height: 90%;
+            margin: 2% auto;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .back-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="logo-container">
+            <img src="images/header/ano-logo.png" alt="АНО ЦЭ" class="logo">
+            <img src="https://cipr.ru/wp-content/uploads/2024/02/cipr-logo-2024.svg" alt="ЦИПР" class="logo">
+        </div>
+    </header>
+
+    <main>
+        <div class="cards-container">
+            <div class="card" onclick="openFrame('https://цифроваяэкономика.рф/')">
+                <h2>Белая книга цифровой экономики</h2>
+            </div>
+            <div class="card" onclick="openFrame('https://d-economy.ru/research/')">
+                <h2>Аналитические отчеты</h2>
+            </div>
+            <div class="card" onclick="openFrame('https://техлид.рф/')">
+                <h2>ТехЛид</h2>
+            </div>
+            
+            <div class="card" onclick="openFrame('https://техлид.рф/support-navigator/')">
+                <h2>Навигатор мер поддержки</h2>
+            </div>
+            <div class="card" onclick="openFrame('https://web.geointellect.com/79387e2080564db2be65a99b88b632bb?public_credentials=Njc2M2FmNzYyNzMzNDhhNGFkYzM1MzgwMGUxYmVkNjZ8YTc5MTQ3MDctNjFiMi00YjUyLWI5ZGEtZWEwYWFiYjQ0NDE1')">
+                <h2>Международный бизнес навигатор ТехЛида</h2>
+            </div>
+            <div class="card" onclick="openFrame('https://10.d-economy.ru/')">
+                <h2>10+10+10</h2>
+            </div>
+            <div class="card" onclick="openFrame('https://ai-awards.ru/')">
+                <h2>Премия ИИ</h2>
+            </div>
+            <div class="card" onclick="openFrame('https://d-economy.ru/project/cifrobank/')">
+                <h2>Цифробанк</h2>
+            </div>
+            <div class="card" onclick="openFrame('https://prokachka.space/')">
+                <h2>Цифровая прокачка</h2>
+            </div>
+            <div class="card" onclick="openFrame('https://cdtomap.d-economy.ru/')">
+                <h2>Платформа «Управление цифровой трансформацией в субъектах РФ»</h2>
+            </div>
+            <div class="card" onclick="openFrame('https://digital-likbez.datalesson.ru/')">
+                <h2>Цифровой ликбез</h2>
+            </div>
+            <div class="card" onclick="openFrame('https://урокцифры.рф/')">
+                <h2>Урок цифры</h2>
+            </div>
+            <div class="card" onclick="startQuiz()">
+                <h2>Цифратест</h2>
+            </div>
+        </div>
+    </main>
+
+    <div class="iframe-container" id="iframeContainer">
+        <div class="iframe-wrapper">
+            <button class="close-button" onclick="closeFrame()">Закрыть</button>
+            <iframe id="contentFrame" src=""></iframe>
+        </div>
+    </div>
+
+    <script>
+        function startQuiz() {
+            window.location.href = 'quiz.html';
+        }
+
+        function openFrame(url) {
+            const container = document.getElementById('iframeContainer');
+            const frame = document.getElementById('contentFrame');
+            frame.src = url;
+            container.style.display = 'block';
+        }
+
+        function closeFrame() {
+            const container = document.getElementById('iframeContainer');
+            const frame = document.getElementById('contentFrame');
+            frame.src = '';
+            container.style.display = 'none';
+        }
+    </script>
+</body>
+</html> 

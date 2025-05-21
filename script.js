@@ -126,10 +126,16 @@ function validateForm(showAlert = true) {
 // ============= Функции управления квизом =============
 function loadQuestion() {
     const questionData = randomQuestions[currentQuestion];
+    console.log('currentQuestion:', currentQuestion, 'randomQuestions:', randomQuestions);
+    if (!questionData) {
+        alert('Нет данных для вопроса!');
+        console.error('Нет данных для вопроса', currentQuestion, randomQuestions);
+        return;
+    }
     const quizContent = document.querySelector('.quiz-content');
     const currentLogoSrc = questionData.logo;
 
-    // --- Подсветка логотипа в бегущей строке ---
+    // --- Подсветка логотипов ---
     const allMarqueeLogos = document.querySelectorAll('.background-marquee .marquee-content img');
     allMarqueeLogos.forEach(img => {
         img.classList.remove('highlighted-logo');
@@ -138,6 +144,7 @@ function loadQuestion() {
         }
     });
 
+    // Полная очистка контента
     quizContent.innerHTML = '';
 
     if (questionData.image) {
@@ -155,6 +162,7 @@ function loadQuestion() {
         </div>
     `;
     quizContent.appendChild(questionContainer);
+    console.log('Добавлен вопрос');
 
     // 2. Изображение (если есть)
     if (questionData.image) {
@@ -165,6 +173,7 @@ function loadQuestion() {
         imgElement.alt = 'Question illustration';
         imageContainer.appendChild(imgElement);
         quizContent.appendChild(imageContainer);
+        console.log('Добавлена картинка');
     }
 
     // 3. Варианты ответов
@@ -179,33 +188,32 @@ function loadQuestion() {
         choicesContainer.appendChild(button);
     });
     quizContent.appendChild(choicesContainer);
+    elements.choices = choicesContainer; // ВАЖНО: обновляем ссылку
 
-    // 4. Кнопки действий
-    const actionsContainer = document.createElement('div');
-    actionsContainer.className = 'quiz-actions-area';
-    
-    // Создаем HTML для кнопок
-    actionsContainer.innerHTML = `
-        <div class="nav-buttons">
-            ${currentQuestion > 0 ? `
-                <button class="back-button" onclick="goToPreviousQuestion()">
-                    <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-                    Вернуться назад
-                </button>
-            ` : '<div></div>'}
-            <button id="submit">Следующий вопрос</button>
+    // 4. Прогресс-бар (отдельной строкой)
+    let progressContainer = document.createElement('div');
+    progressContainer.id = 'progress-container';
+    progressContainer.innerHTML = `
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+            <span class="progress-text">1 из 6</span>
         </div>
     `;
+    quizContent.appendChild(progressContainer);
+    elements.progressFill = progressContainer.querySelector('.progress-fill');
 
-    // Добавляем обработчик для кнопки "Следующий вопрос"
-    const submitButton = actionsContainer.querySelector('#submit');
+    // 5. Кнопки действий (отдельной строкой)
+    const actionsRow = document.createElement('div');
+    actionsRow.className = 'quiz-actions-row';
+    actionsRow.innerHTML = `
+        <button class="back-button"${currentQuestion === 0 ? ' disabled' : ''} onclick="goToPreviousQuestion()">← Вернуться назад</button>
+        <button id="submit">Следующий вопрос</button>
+    `;
+    const submitButton = actionsRow.querySelector('#submit');
     submitButton.addEventListener('click', handleSubmit);
-    
-    quizContent.appendChild(actionsContainer);
-
-    elements.choices = choicesContainer;
+    quizContent.appendChild(actionsRow);
     elements.submit = submitButton;
-    
+
     // Проверяем, есть ли сохраненный ответ для текущего вопроса
     const savedAnswer = userAnswers[currentQuestion];
     if (savedAnswer !== undefined) {
@@ -214,26 +222,18 @@ function loadQuestion() {
         if (choiceButtons[savedAnswer]) {
             // Восстанавливаем выбранный ответ и показываем правильный/неправильный
             const correctIndex = randomQuestions[currentQuestion].correct;
-            
-            // Применяем классы для отображения результата
             choiceButtons[savedAnswer].classList.add('selected');
-            
             if (savedAnswer === correctIndex) {
                 choiceButtons[savedAnswer].classList.add('correct');
             } else {
                 choiceButtons[savedAnswer].classList.add('incorrect');
                 choiceButtons[correctIndex].classList.add('correct');
             }
-            
-            // Блокируем все варианты ответов
             choiceButtons.forEach(btn => btn.classList.add('disabled'));
-            
-            // Активируем кнопку "Далее"
             elements.submit.disabled = false;
             elements.submit.classList.remove('disabled');
         }
     } else {
-        // Если нет сохраненного ответа, кнопка "Далее" должна быть неактивна
         elements.submit.disabled = true;
         elements.submit.classList.add('disabled');
     }
@@ -292,51 +292,57 @@ function resetHighlightedLogos() {
 }
 
 function showResults() {
-    // Сбрасываем выделение логотипов
     resetHighlightedLogos();
 
     elements.quiz.style.display = 'none';
     elements.results.style.display = 'block';
-    
-    // Вычисляем процент правильных ответов
+
     const correctPercent = Math.floor((score / randomQuestions.length) * 100);
-    const scoreText = `Правильных ответов: ${score} из ${randomQuestions.length}`;
-    
-    // Определяем сообщение в зависимости от процента
-    let resultMessage = '';
-    let resultClass = '';
-    
-    if (correctPercent >= 70) {
-        resultMessage = 'Цифровой гуру';
-        resultClass = 'result-excellent';
-    } else if (correctPercent >= 40) {
-        resultMessage = 'Цифровой ученик';
-        resultClass = 'result-average';
-    } else {
-        resultMessage = 'Цифровой невежда';
-        resultClass = 'result-poor';
-    }
-    
-    // Обновляем содержимое блока результатов
-    const resultsContainer = elements.results;
-    resultsContainer.innerHTML = `
-        <h2>Результаты</h2>
-        <div class="score-container ${resultClass}">
-            <div class="score-circle">
-                <div class="score-number">${correctPercent}%</div>
+    const resultText = correctPercent >= 70 ? 'Цифровой гуру'
+                      : correctPercent >= 40 ? 'Цифровой ученик'
+                      : 'Цифровой невежда';
+    const resultColor = correctPercent >= 70 ? '#2DA700'
+                      : correctPercent >= 40 ? '#1A8F2A'
+                      : '#FF0050'; // Более насыщенный красный
+
+    // SVG pie chart
+    const total = randomQuestions.length;
+    const correct = score;
+    const angle = (correct / total) * 360;
+    const r = 60, cx = 70, cy = 70;
+    const largeArc = angle > 180 ? 1 : 0;
+    const x = cx + r * Math.cos((angle - 90) * Math.PI / 180);
+    const y = cy + r * Math.sin((angle - 90) * Math.PI / 180);
+
+    const piePath = correct === 0
+        ? ''
+        : `M${cx},${cy} L${cx},${cy - r} A${r},${r} 0 ${largeArc},1 ${x},${y} Z`;
+
+    elements.results.innerHTML = `
+        <div class="results-header">ТЕСТ ЗАВЕРШЕН</div>
+        <div class="results-main">
+            <div class="results-left">
+                <div class="results-label">Ваш результат:</div>
+                <div class="results-title" style="color:${resultColor}">${resultText.replace(' ', '<br>')}</div>
             </div>
-            <div class="score-text">${scoreText}</div>
+            <div class="results-right">
+                <div class="results-answers-label">Правильных ответов</div>
+                <div class="results-answers-value"><span>${score}</span><span style='color:#222;font-weight:700;font-size:0.8em;'>/ ${total}</span></div>
+                <div class="results-pie">
+                    <svg width="140" height="140" viewBox="0 0 140 140">
+                        <circle cx="70" cy="70" r="60" fill="#fff" stroke="#2A3AFF" stroke-width="8"/>
+                        ${correct > 0 ? `<path d="${piePath}" fill="#2A3AFF"/>` : ''}
+                    </svg>
+                </div>
+            </div>
         </div>
-        <p class="result-message">${resultMessage}</p>
-        <div class="results-actions">
-            <button class="email-button">Отправить результаты на почту</button>
-            <button id="restart" class="restart-button">Начать заново</button>
+        <div class="results-actions-row">
+            <button id="restart" class="results-btn results-btn-outline">Начать заново</button>
+            <button id="send-email" class="results-btn results-btn-blue">Отправить результаты на почту</button>
         </div>
     `;
-    
-    // Добавляем обработчики событий для новых кнопок
-    resultsContainer.querySelector('#restart').addEventListener('click', resetQuiz);
-    resultsContainer.querySelector('.email-button').addEventListener('click', sendResultsByEmail);
+    elements.results.querySelector('#restart').addEventListener('click', resetQuiz);
+    elements.results.querySelector('#send-email').addEventListener('click', sendResultsByEmail);
 }
 
 function resetQuiz() {
@@ -377,15 +383,11 @@ function startQuiz(totalQuestions) {
         
         elements.registration.style.display = 'none';
         elements.quiz.style.display = 'block';
-        elements.progressContainer.style.display = 'block';
+        // elements.progressContainer.style.display = 'block';
         
         // Определяем количество вопросов из каждого источника
         const questionsPerSource = totalQuestions / 6;
         randomQuestions = getRandomQuestionsFromAllSources(questionsPerSource);
-        
-        // Обновляем счетчик и прогресс-бар
-        elements.totalQuestions.textContent = totalQuestions;
-        updateProgress();
         
         loadQuestion();
     }
@@ -443,47 +445,31 @@ async function sendResultsByEmail() {
 
 // Добавляем функцию обновления прогресса
 function updateProgress() {
-    // Проверяем наличие всех необходимых элементов и данных
     const questionsExist = randomQuestions && Array.isArray(randomQuestions) && randomQuestions.length > 0;
-    const elementsExist = elements.currentQuestion && elements.totalQuestions && elements.progressFill;
-
-    if (elementsExist && questionsExist) {
+    if (questionsExist && elements.progressFill) {
         const currentQIndex = typeof currentQuestion === 'number' ? currentQuestion : 0;
         const totalQ = randomQuestions.length;
 
-        // Обновляем текстовые счетчики
-        elements.currentQuestion.textContent = currentQIndex + 1;
-        elements.totalQuestions.textContent = totalQ; // Убедимся, что общее число обновляется
-
         // Вычисляем процент
-        // Делаем +1, так как currentQuestion начинается с 0
         const progressPercentage = ((currentQIndex + 1) / totalQ) * 100;
-
-        // Отладочный вывод в консоль
-        console.log(`Updating progress: Q ${currentQIndex + 1}/${totalQ}, Progress: ${progressPercentage}%`);
-
-        // Применяем стиль ширины
         elements.progressFill.style.width = `${progressPercentage}%`;
 
-    } else {
-        // Логируем, если что-то пошло не так
-        console.warn("Could not update progress bar. Details:", {
-             elementsFound: elementsExist,
-             questionsAvailable: questionsExist,
-             totalQuestionsCount: randomQuestions?.length,
-             currentQuestionIndex: currentQuestion,
-             progressFillElement: elements.progressFill // Проверяем сам элемент
-        });
-        // Сбрасываем прогресс, если элементы есть, но данных нет
-        if (elements.progressFill) {
-             elements.progressFill.style.width = '0%';
+        // Обновляем текст только в актуальном progress-bar
+        let progressContainer = document.getElementById('progress-container');
+        const progressText = progressContainer ? progressContainer.querySelector('.progress-text') : null;
+        if (progressText) {
+            progressText.textContent = `${currentQIndex + 1} из ${totalQ}`;
         }
-         if (elements.currentQuestion) {
-             elements.currentQuestion.textContent = '1'; // Начнем с 1
-         }
-         if (elements.totalQuestions) {
-             elements.totalQuestions.textContent = '??'; // Или 0, если вопросов нет
-         }
+    } else {
+        // Сброс прогресса, если нет данных
+        if (elements.progressFill) {
+            elements.progressFill.style.width = '0%';
+        }
+        let progressContainer = document.getElementById('progress-container');
+        const progressText = progressContainer ? progressContainer.querySelector('.progress-text') : null;
+        if (progressText) {
+            progressText.textContent = `1 из ??`;
+        }
     }
 }
 

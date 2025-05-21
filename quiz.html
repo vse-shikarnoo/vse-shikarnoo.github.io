@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Веб-квиз</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .quiz-option:disabled,
+        .quiz-option.disabled {
+            background: linear-gradient(145deg, #cccccc, #aaaaaa) !important;
+            cursor: not-allowed !important;
+            opacity: 0.7 !important;
+            box-shadow: none !important;
+            transform: none !important;
+            pointer-events: none !important;
+        }
+
+        .quiz-option:disabled:hover,
+        .quiz-option.disabled:hover {
+            transform: none !important;
+            box-shadow: none !important;
+            background: linear-gradient(145deg, #cccccc, #aaaaaa) !important;
+        }
+
+        .back-to-main {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .back-to-main:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo-container">
+            <img src="images/header/ano-logo.png" alt="АНО ЦЭ" class="logo">
+            <img src="https://cipr.ru/wp-content/uploads/2024/02/cipr-logo-2024.svg" alt="ЦИПР" class="logo">
+        </div>
+    </header>
+    <main>
+        <div class="quiz-container">
+            <!-- Регистрация: иллюстрация внутри карточки -->
+            <div id="registration" class="registration-form">
+                <div class="registration-row" style="display: flex; align-items: flex-start; gap: 40px;">
+                    <div class="registration-illustration" style="margin-bottom: 0; margin-right: 0; justify-content: flex-start;">
+                        <img src="images/registration-illustration.png" alt="Иллюстрация регистрации">
+                    </div>
+                    <div class="registration-fields" style="flex: 1;">
+                        <h1>Регистрация</h1>
+                        <div class="form-group">
+                            <input type="text" id="fullName" placeholder="ФИО" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="company" placeholder="Название компании" required>
+                            <div class="error-message" style="display:none;">Введите название компании полностью</div>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" placeholder="Email" required>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <label style="display: flex; align-items: center; gap: 10px; width: 100%;">
+                                <input type="checkbox" id="agreement" required>
+                                <span>Соглашаюсь с <a href="https://files.data-economy.ru/Docs/privacy.pdf" class="policy-link" target="_blank">политикой в отношении обработки персональных данных</a></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="quiz-options">
+                    <button id="startQuiz1" class="quiz-option">3 минуты<span>6 вопросов</span></button>
+                    <button id="startQuiz2" class="quiz-option">5 минут<span>12 вопросов</span></button>
+                    <button id="startQuiz3" class="quiz-option">7 минут<span>18 вопросов</span></button>
+                </div>
+            </div>
+            <!-- Обновляем секцию с квизом -->
+            <div id="quiz" style="display: none;">
+                <!-- Добавляем белую карточку-обертку -->
+                <div class="quiz-card">
+                    <div class="quiz-content">
+                        <!-- JS будет добавлять сюда элементы -->
+                    </div>
+                </div>
+            </div>
+            
+            <div id="results" style="display: none;">
+                <h2>Результаты</h2>
+                <p>Правильных ответов: <span id="score"></span></p>
+                <button id="restart" class="restart-button">Начать заново</button>
+            </div>
+        </div>
+    </main>
+    <button class="back-to-main" onclick="window.location.href='main.html'">На главную</button>
+    <script src="quizData.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
