@@ -43,7 +43,6 @@ main {
 /* Стили для белой карточки */
 .quiz-card {
     background: rgba(255, 255, 255, 0.97);
-    border-radius: 32px;
     padding: 48px 56px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.10);
     margin: 40px auto;
@@ -63,7 +62,6 @@ main {
 #registration.registration-form {
     background: linear-gradient(145deg, #ffffff, #f8f9fa);
     padding: 40px 48px;
-    border-radius: 24px;
     box-shadow: 0 10px 30px rgba(34, 49, 89, 0.03), 0 1px 2px rgba(34, 49, 89, 0.02);
     margin-bottom: 0;
     flex: 1;
@@ -97,7 +95,6 @@ main {
     height: 100%;
     min-height: 0;
     object-fit: cover;
-    border-radius: 0;
     box-shadow: 0 8px 24px rgba(42, 58, 255, 0.08);
     display: block;
 }
@@ -134,7 +131,6 @@ main {
     width: 100%;
     padding: 14px 18px;
     border: 1px solid #eef0f7;
-    border-radius: 0;
     font-size: 17px;
     transition: all 0.3s ease;
     background: #fff;
@@ -207,7 +203,6 @@ main {
     position: relative;
     background: #f8f9fa;
     height: 48px;
-    border-radius: 0;
     overflow: hidden;
     width: 100%;
     display: flex;
@@ -217,7 +212,6 @@ main {
     background: #78E150;
     height: 100%;
     width: 0%;
-    border-radius: 0;
     transition: width 0.4s ease-in-out;
     display: block;
     position: absolute;
@@ -254,7 +248,6 @@ main {
     height: auto;
     padding: 0;
     background: none;
-    border-radius: 0;
     box-shadow: none;
 }
 .company-logo img {
@@ -282,7 +275,6 @@ main {
 .choice {
     background: #f8f9fa;
     padding: 14px 18px;
-    border-radius: 0;
     border: none;
     font-size: 15px;
     line-height: 1.5;
@@ -351,7 +343,6 @@ main {
     gap: 6px;
     transition: color 0.3s ease;
     min-width: 130px;
-    border-radius: 0;
 }
 
 .quiz-actions-area .back-button svg {
@@ -367,7 +358,6 @@ main {
 .quiz-actions-area #submit {
     background: #2A3AFF;
     padding: 12px 25px;
-    border-radius: 0;
     font-size: 15px;
     font-weight: 500;
     color: white;
@@ -454,13 +444,11 @@ main {
     width: auto;
     height: auto;
     max-height: 400px;
-    border-radius: 24px !important;
     object-fit: contain;
 }
 
 /* Сброс всех возможных конфликтующих стилей */
 .quiz-image-area img {
-    border-radius: 24px !important;
     overflow: visible !important;
 }
 
@@ -504,7 +492,6 @@ main {
 
     .quiz-content.layout-two-column .quiz-image-area img {
         max-height: 300px;
-        border-radius: 16px !important;
     }
     
     .quiz-content.layout-two-column .quiz-actions-area {
@@ -540,7 +527,6 @@ main {
 #results {
     background: none;
     box-shadow: none;
-    border-radius: 0;
     max-width: none;
     margin: 0;
     padding: 0;
@@ -563,7 +549,6 @@ main {
     text-align: center;
     padding: 36px 0 26px 0;
     letter-spacing: 2.5px;
-    border-radius: 0;
     margin-bottom: 32px;
     text-transform: uppercase;
 }
@@ -753,7 +738,6 @@ main {
 .registration-form {
     background: linear-gradient(145deg, #ffffff, #f8f9fa);
     padding: 40px 48px;
-    border-radius: 24px;
     box-shadow: 0 10px 30px rgba(34, 49, 89, 0.03), 0 1px 2px rgba(34, 49, 89, 0.02);
     margin-bottom: 0;
     flex: 1;
@@ -786,7 +770,6 @@ main {
     height: 100%;
     min-height: 0;
     object-fit: cover;
-    border-radius: 0;
     box-shadow: 0 8px 24px rgba(42, 58, 255, 0.08);
     display: block;
 }
@@ -823,7 +806,6 @@ main {
     width: 100%;
     padding: 14px 18px;
     border: 1px solid #eef0f7;
-    border-radius: 0;
     font-size: 17px;
     transition: all 0.3s ease;
     background: #fff;
@@ -891,7 +873,6 @@ main {
 
 .quiz-option {
     background: #3422EB;
-    border-radius: 0;
     font-size: 18px;
     font-weight: 600;
     letter-spacing: -0.3px;
@@ -984,7 +965,6 @@ main {
 .registration-illustration img {
     width: 100%;
     max-width: 320px;
-    border-radius: 0;
     box-shadow: 0 8px 24px rgba(42, 58, 255, 0.08);
 }
 @media (max-width: 900px) {
