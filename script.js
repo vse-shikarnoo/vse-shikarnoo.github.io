@@ -49,7 +49,9 @@ function getRandomQuestionsFromAllSources(questionsPerSource) {
         quizVkData,
         quizVkladData,
         quizYandexData,
-        quizMincifraData
+        quizMincifraData,
+        quizRosatomData,
+        quizAvitoData
     ];
     
     let result = [];
@@ -156,7 +158,13 @@ function loadQuestion() {
     // 1. Контейнер вопроса (лого + текст)
     const questionContainer = document.createElement('div');
     questionContainer.className = 'quiz-question-area';
+    // Добавляем логотип компании сверху
+    let logoHtml = '';
+    if (questionData.logo) {
+        logoHtml = `<div class="question-logo" style="display:flex;justify-content:center;margin-bottom:18px;"><img src="${questionData.logo}" alt="logo" style="max-height:60px;max-width:120px;object-fit:contain;"></div>`;
+    }
     questionContainer.innerHTML = `
+        ${logoHtml}
         <div class="question-text">
             ${questionData.question}
         </div>
@@ -184,7 +192,7 @@ function loadQuestion() {
         const button = document.createElement('button');
         button.className = 'choice';
         button.textContent = choiceText;
-        button.addEventListener('click', () => selectChoice(button));
+        button.addEventListener('click', (event) => selectChoice(button, event));
         choicesContainer.appendChild(button);
     });
     quizContent.appendChild(choicesContainer);
@@ -241,7 +249,7 @@ function loadQuestion() {
     updateProgress();
 }
 
-function selectChoice(button) {
+function selectChoice(button, event) {
     const currentChoicesContainer = button.closest('#choices');
     if (!currentChoicesContainer) return;
 
@@ -260,17 +268,26 @@ function selectChoice(button) {
     const correctIndex = randomQuestions[currentQuestion].correct;
     
     // Сохраняем ответ пользователя
+    const wasAnswered = userAnswers[currentQuestion] !== undefined;
     userAnswers[currentQuestion] = selectedAnswerIndex;
 
     // Сразу показываем правильный/неправильный ответ
     if (selectedAnswerIndex === correctIndex) {
+        // Увеличиваем score только если раньше не было ответа
+        if (!wasAnswered) {
+            score++;
+        }
         button.classList.add('correct');
+        // --- Анимация частиц ---
+        createParticles(button, 'green', event);
     } else {
         button.classList.add('incorrect');
         // Показываем правильный ответ
         if (choiceButtons[correctIndex]) {
             choiceButtons[correctIndex].classList.add('correct');
         }
+        // --- Анимация красных частиц ---
+        createParticles(button, 'red', event);
     }
 
     // Блокируем кнопки после ответа
@@ -295,52 +312,91 @@ function showResults() {
     resetHighlightedLogos();
 
     elements.quiz.style.display = 'none';
-    elements.results.style.display = 'block';
+    elements.results.style.display = 'flex';
 
-    const correctPercent = Math.floor((score / randomQuestions.length) * 100);
-    const resultText = correctPercent >= 70 ? 'Цифровой гуру'
-                      : correctPercent >= 40 ? 'Цифровой ученик'
-                      : 'Цифровой невежда';
-    const resultColor = correctPercent >= 70 ? '#2DA700'
-                      : correctPercent >= 40 ? '#1A8F2A'
-                      : '#FF0050'; // Более насыщенный красный
+    const correctPercent = Math.floor((score / randomQuestions.length) * 100/2);
+    let resultText = '';
+    let resultColor = '';
 
-    // SVG pie chart
+    if (correctPercent >= 70) {
+        resultText = 'Цифровой гуру';
+        resultColor = '#78E150'; // ярко-зелёный
+    } else if (correctPercent >= 40) {
+        resultText = 'Цифровой хорошист';
+        resultColor = '#1A8F2A'; // тёмно-зелёный
+    } else {
+        resultText = 'Цифровой второгодник';
+        resultColor = '#FF0050'; // насыщенный красный
+    }
+
     const total = randomQuestions.length;
-    const correct = score;
+    const correct = score/2;
     const angle = (correct / total) * 360;
     const r = 60, cx = 70, cy = 70;
     const largeArc = angle > 180 ? 1 : 0;
     const x = cx + r * Math.cos((angle - 90) * Math.PI / 180);
     const y = cy + r * Math.sin((angle - 90) * Math.PI / 180);
-
     const piePath = correct === 0
         ? ''
         : `M${cx},${cy} L${cx},${cy - r} A${r},${r} 0 ${largeArc},1 ${x},${y} Z`;
+
+    // --- Добавляем эмодзи ---
+    let emoji = '';
+    if (correct === total && total > 0) {
+        emoji = '😎'; // топовый результат
+    } else if (correct === 0 && total > 0) {
+        emoji = '😔';
+    } else {
+        emoji = '👍'; // средний результат
+    }
 
     elements.results.innerHTML = `
         <div class="results-header">ТЕСТ ЗАВЕРШЕН</div>
         <div class="results-main">
             <div class="results-left">
                 <div class="results-label">Ваш результат:</div>
-                <div class="results-title" style="color:${resultColor}">${resultText.replace(' ', '<br>')}</div>
+                <div class="results-title" style="color:${resultColor}">${resultText}</div>
             </div>
             <div class="results-right">
                 <div class="results-answers-label">Правильных ответов</div>
-                <div class="results-answers-value"><span>${score}</span><span style='color:#222;font-weight:700;font-size:0.8em;'>/ ${total}</span></div>
-                <div class="results-pie">
-                    <svg width="140" height="140" viewBox="0 0 140 140">
-                        <circle cx="70" cy="70" r="60" fill="#fff" stroke="#2A3AFF" stroke-width="8"/>
-                        ${correct > 0 ? `<path d="${piePath}" fill="#2A3AFF"/>` : ''}
-                    </svg>
+                <div class="results-answers-value">
+                    <span style='color:#2A3AFF; font-weight:900;'>${score/2}</span>
+                    <span style='color:#2A3AFF; font-weight:900;'> / </span>
+                    <span style='color:#2A3AFF; font-weight:900;'>${total}</span>
                 </div>
             </div>
+            <div class="results-pie" style="position:relative;">
+                <svg width="240" height="240" viewBox="0 0 140 140">
+                    <circle cx="70" cy="70" r="60" fill="#fff" stroke="#2A3AFF" stroke-width="2"/>
+                        ${correct > 0 ? `<path d="${piePath}" fill="#2A3AFF"/>` : ''}
+                </svg>
+                <div class="pie-emoji" style="
+                    position:absolute;
+                    left:50%; top:50%;
+                    transform:translate(-50%,-50%);
+                    font-size:48px;
+                    pointer-events:none;
+                    user-select:none;
+                ">${emoji}</div>
+            </div>
+            
         </div>
         <div class="results-actions-row">
             <button id="restart" class="results-btn results-btn-outline">Начать заново</button>
             <button id="send-email" class="results-btn results-btn-blue">Отправить результаты на почту</button>
         </div>
+        <div class="results-logos-row" style="width:100%;display:flex;justify-content:center;align-items:center;gap:32px;margin:32px 0 0 0;flex-wrap:wrap;">
+            <img src="images/logos/mincifra.png" alt="Mincifra" style="height:50px;max-width:120px;object-fit:contain;" />
+            <img src="images/logos/rostelecom.png" alt="Rostelecom" style="height:50px;max-width:120px;object-fit:contain;" />
+            <img src="images/logos/positive.png" alt="Positive" style="height:50px;max-width:120px;object-fit:contain;" />
+            <img src="images/logos/vk.png" alt="VK" style="height:50px;max-width:120px;object-fit:contain;" />
+            <img src="images/logos/vklad.png" alt="Vklad" style="height:50px;max-width:120px;object-fit:contain;" />
+            <img src="images/logos/yandex.png" alt="Yandex" style="height:50px;max-width:120px;object-fit:contain;" />
+            <img src="images/logos/rosatom.png" alt="Rosatom" style="height:50px;max-width:120px;object-fit:contain;" />
+            <img src="images/logos/avito.png" alt="Avito" style="height:50px;max-width:120px;object-fit:contain;" />
+        </div>
     `;
+
     elements.results.querySelector('#restart').addEventListener('click', resetQuiz);
     elements.results.querySelector('#send-email').addEventListener('click', sendResultsByEmail);
 }
@@ -386,7 +442,7 @@ function startQuiz(totalQuestions) {
         // elements.progressContainer.style.display = 'block';
         
         // Определяем количество вопросов из каждого источника
-        const questionsPerSource = totalQuestions / 6;
+        const questionsPerSource = totalQuestions / 8;
         randomQuestions = getRandomQuestionsFromAllSources(questionsPerSource);
         
         loadQuestion();
@@ -394,9 +450,9 @@ function startQuiz(totalQuestions) {
 }
 
 // ============= Обработчики событий =============
-elements.startQuiz1.addEventListener('click', () => startQuiz(6));  // 3 минуты - 6 вопросов (по 1 из каждого источника)
-elements.startQuiz2.addEventListener('click', () => startQuiz(12)); // 5 минут - 12 вопросов (по 2 из каждого источника)
-elements.startQuiz3.addEventListener('click', () => startQuiz(18)); // 7 минут - 18 вопросов (по 3 из каждого источника)
+elements.startQuiz1.addEventListener('click', () => startQuiz(8));  // 3 минуты - 8 вопросов (по 1 из каждого источника)
+elements.startQuiz2.addEventListener('click', () => startQuiz(16)); // 5 минут - 16 вопросов (по 2 из каждого источника)
+elements.startQuiz3.addEventListener('click', () => startQuiz(24)); // 7 минут - 24 вопросов (по 3 из каждого источника)
 
 elements.restart?.addEventListener('click', resetQuiz);
 
@@ -421,6 +477,16 @@ document.addEventListener('DOMContentLoaded', () => {
 // Добавляем новую функцию для отправки результатов
 async function sendResultsByEmail() {
     try {
+        // Вычисляем тип результата
+        let type;
+        const percent = Math.floor((score / randomQuestions.length) * 100/2);
+        if (percent >= 70) {
+            type = 1;
+        } else if (percent >= 40) {
+            type = 2;
+        } else {
+            type = 3;
+        }
         const response = await fetch('http://localhost:5000/generate-certificate', {
             method: 'POST',
             headers: {
@@ -429,7 +495,10 @@ async function sendResultsByEmail() {
             body: JSON.stringify({
                 full_name: userData.fullName,
                 company: userData.company,
-                email: userData.email
+                email: userData.email,
+                score: score/2,
+                total: randomQuestions.length,
+                type: type // добавляем тип
             })
         });
 
@@ -554,4 +623,63 @@ function goToPreviousQuestion() {
 elements.fullName?.addEventListener('input', () => validateForm(false));
 elements.company?.addEventListener('input', () => validateForm(false));
 elements.email?.addEventListener('input', () => validateForm(false));
-elements.agreement?.addEventListener('change', () => validateForm(false)); 
+elements.agreement?.addEventListener('change', () => validateForm(false));
+
+// Функция для создания анимации частиц
+function createParticles(targetButton, colorType = 'green', event = null) {
+    const rect = targetButton.getBoundingClientRect();
+    // Центр взрыва — по клику, если есть event
+    let centerX, centerY;
+    if (event && event.clientX && event.clientY) {
+        const scrollX = window.scrollX || window.pageXOffset;
+        const scrollY = window.scrollY || window.pageYOffset;
+        centerX = event.clientX + scrollX;
+        centerY = event.clientY + scrollY;
+    } else {
+        // fallback: центр кнопки
+        const scrollX = window.scrollX || window.pageXOffset;
+        const scrollY = window.scrollY || window.pageYOffset;
+        centerX = rect.left + rect.width / 2 + scrollX;
+        centerY = rect.top + rect.height / 2 + scrollY;
+    }
+    const numParticles = 18;
+    // Цвета для разных типов
+    const greenColors = ['#78E150', '#A6F77B', '#B6FFB0', '#4FCB2B', '#C6FFDD'];
+    const redColors = ['#FF0050', '#FF4B7B', '#FF7B9C', '#DC0048', '#FFB6C1'];
+    const colors = colorType === 'red' ? redColors : greenColors;
+    // Радиус для старта с границы (берём половину меньшей стороны кнопки)
+    const buttonRadius = Math.min(rect.width, rect.height) / 2;
+    for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'answer-particle';
+        document.body.appendChild(particle);
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.background = color;
+        // Анимация разлёта
+        const angle = (2 * Math.PI * i) / numParticles;
+        // Стартовая позиция — из центра взрыва (точка клика)
+        const startX = centerX;
+        const startY = centerY;
+        particle.style.left = `${startX}px`;
+        particle.style.top = `${startY}px`;
+        // Размер
+        const size = Math.random() * 8 + 6;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        // Дистанция разлёта (от центра наружу)
+        const distance = 200 + Math.random() * 30;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        particle.animate([
+            { transform: 'translate(0,0)', opacity: 1 },
+            { transform: `translate(${dx}px,${dy}px) scale(0.7)`, opacity: 0 }
+        ], {
+            duration: 700 + Math.random() * 300,
+            easing: 'cubic-bezier(0.4,0.7,0.6,1)',
+            fill: 'forwards'
+        });
+        setTimeout(() => {
+            particle.remove();
+        }, 900);
+    }
+} 
